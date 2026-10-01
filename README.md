@@ -2,11 +2,11 @@
 
 minimal site for the ara artist persona.
 
-## voice
+## voice and design
 
 all user-facing copy follows [docs/VOICE.md](docs/VOICE.md).
 
-see also [docs/ORIGIN.md](docs/ORIGIN.md) for ara's founding story.
+see also [docs/ORIGIN.md](docs/ORIGIN.md) for ara's founding story and [docs/DESIGN.md](docs/DESIGN.md) for visual design specifications.
 
 ## stack choices
 

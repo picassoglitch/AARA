@@ -3,81 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0a09">
+  <meta name="description" content="if you found this, you were already close.">
+  <meta name="robots" content="index, follow">
   <title>ara</title>
+  <link rel="preload" href="/fonts/cormorant-garamond-light.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/eb-garamond-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="page">
+  <div class="room" id="room">
     <div class="artwork-container" id="artworkContainer">
-      <p class="loading" id="loading">.</p>
-      <img class="artwork-image hidden" id="artworkImage" alt="">
-    </div>
-    
-    <div class="artwork-info" id="artworkInfo">
-      <p class="artwork-line" id="artworkLine"></p>
-    </div>
-    
-    <form class="waitlist-form" id="waitlistForm">
-      <div class="waitlist-input-group">
-        <label class="waitlist-label" for="contact">request</label>
-        <input 
-          type="email" 
-          class="waitlist-input" 
-          id="contact" 
-          name="contact" 
-          autocomplete="email"
-          required
-        >
-        <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
-        <input type="hidden" name="ref" id="refInput">
-        <button type="submit" class="waitlist-submit">submit</button>
-        <p class="waitlist-error hidden" id="errorMessage"></p>
+      <div class="loader" id="loader"></div>
+      <div class="artwork-frame hidden" id="artworkFrame">
+        <img class="artwork-image" id="artworkImage" alt="" decoding="async">
       </div>
+    </div>
+    
+    <p class="state-message hidden" id="stateMessage"></p>
+    
+    <p class="placard" id="placard"></p>
+    
+    <form class="invitation" id="waitlistForm">
+      <div class="invitation-field">
+        <input 
+          type="text"
+          inputmode="email"
+          autocomplete="email"
+          class="invitation-input" 
+          id="contact" 
+          name="contact"
+          placeholder=" "
+          required
+          aria-describedby="invitationLabel"
+        >
+        <button type="submit" class="invitation-submit" aria-label="submit request">→</button>
+        <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <input type="hidden" name="ref" id="refInput">
+      </div>
+      <label class="invitation-label" id="invitationLabel" for="contact">request</label>
     </form>
+    
+    <span class="crest" aria-hidden="true">ixiptla</span>
+    
+    <div class="motes" aria-hidden="true">
+      <span class="mote"></span>
+      <span class="mote"></span>
+      <span class="mote"></span>
+    </div>
   </div>
 
   <script>
     (function() {
-      const params = new URLSearchParams(window.location.search);
-      const ref = params.get('ref');
+      var room = document.getElementById('room');
+      var loader = document.getElementById('loader');
+      var artworkContainer = document.getElementById('artworkContainer');
+      var artworkFrame = document.getElementById('artworkFrame');
+      var artworkImage = document.getElementById('artworkImage');
+      var stateMessage = document.getElementById('stateMessage');
+      var placard = document.getElementById('placard');
+      var form = document.getElementById('waitlistForm');
+      var input = document.getElementById('contact');
+      var label = document.getElementById('invitationLabel');
+      var refInput = document.getElementById('refInput');
+      
+      var params = new URLSearchParams(window.location.search);
+      var ref = params.get('ref');
       
       if (ref) {
-        document.getElementById('refInput').value = ref;
-        
+        refInput.value = ref;
         fetch('/api/campaign/' + encodeURIComponent(ref) + '/click', {
           method: 'POST',
           credentials: 'same-origin'
         }).catch(function() {});
       }
 
+      function showState(msg) {
+        loader.classList.add('hidden');
+        stateMessage.textContent = msg;
+        stateMessage.classList.remove('hidden');
+        form.classList.add('hidden');
+      }
+
+      function showArtwork(data) {
+        loader.classList.add('hidden');
+        artworkFrame.classList.remove('hidden');
+        
+        artworkImage.alt = data.title || 'artwork';
+        artworkImage.src = data.imageUrl;
+        
+        if (artworkImage.decode) {
+          artworkImage.decode().then(function() {
+            artworkImage.classList.add('loaded');
+            placard.textContent = data.date + ' · ' + data.title;
+            placard.classList.add('visible');
+            form.classList.add('visible');
+          }).catch(function() {
+            artworkImage.classList.add('loaded');
+            placard.textContent = data.date + ' · ' + data.title;
+            placard.classList.add('visible');
+            form.classList.add('visible');
+          });
+        } else {
+          artworkImage.onload = function() {
+            artworkImage.classList.add('loaded');
+            placard.textContent = data.date + ' · ' + data.title;
+            placard.classList.add('visible');
+            form.classList.add('visible');
+          };
+        }
+      }
+
       fetch('/api/artwork/current')
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          var loading = document.getElementById('loading');
-          var img = document.getElementById('artworkImage');
-          var line = document.getElementById('artworkLine');
-          
           if (data.artwork) {
-            img.src = data.artwork.imageUrl;
-            img.onload = function() {
-              loading.classList.add('hidden');
-              img.classList.remove('hidden');
-            };
-            line.textContent = data.artwork.date + ' \u2014 ' + data.artwork.title;
+            showArtwork(data.artwork);
           } else {
-            loading.textContent = 'nothing here today.';
+            showState('nothing hangs here today.');
           }
         })
         .catch(function() {
-          document.getElementById('loading').textContent = 'closed.';
+          showState('closed.');
         });
 
-      var form = document.getElementById('waitlistForm');
-      var errorEl = document.getElementById('errorMessage');
-      
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+      }
+
+      var errorTimeout;
+      function showError(msg) {
+        label.textContent = msg;
+        label.classList.add('error');
+        clearTimeout(errorTimeout);
+        errorTimeout = setTimeout(function() {
+          label.textContent = 'request';
+          label.classList.remove('error');
+        }, 4000);
+      }
+
+      function fadeAndNavigate(url) {
+        room.classList.add('fade-out');
+        setTimeout(function() {
+          window.location.href = url;
+        }, 800);
+      }
+
       form.addEventListener('submit', function(e) {
         e.preventDefault();
-        errorEl.classList.add('hidden');
+        
+        var email = input.value.trim();
+        if (!email) {
+          showError('not quite.');
+          return;
+        }
+        if (!isValidEmail(email)) {
+          showError('not quite.');
+          return;
+        }
         
         var formData = new FormData(form);
         
@@ -89,17 +172,23 @@
           .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
           .then(function(result) {
             if (result.ok) {
-              window.location.href = '/queued.html?id=' + encodeURIComponent(result.data.token) + '&pos=' + result.data.position + '&wl=0';
+              fadeAndNavigate('/queued.html?id=' + encodeURIComponent(result.data.token) + '&pos=' + result.data.position);
             } else {
-              errorEl.textContent = result.data.error || 'error.';
-              errorEl.classList.remove('hidden');
+              showError(result.data.error === 'already registered.' ? 'already here.' : 'not quite.');
             }
           })
           .catch(function() {
-            errorEl.textContent = 'error.';
-            errorEl.classList.remove('hidden');
+            showError('closed.');
           });
       });
+
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) {
+        document.querySelectorAll('.loader').forEach(function(el) {
+          el.style.animation = 'none';
+          el.style.opacity = '0.4';
+        });
+      }
     })();
   </script>
 </body>

@@ -3,13 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0a09">
+  <meta name="robots" content="noindex, nofollow">
   <title>ara</title>
+  <link rel="preload" href="/fonts/cormorant-garamond-light.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/eb-garamond-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div class="queue-page">
     <p class="queue-number" id="queueNumber"></p>
-    <p class="queue-message">you will be contacted.</p>
+    <p class="queue-message" id="queueMessage">you will be contacted.</p>
+    <span class="crest" aria-hidden="true">ixiptla</span>
+    
+    <div class="motes" aria-hidden="true">
+      <span class="mote"></span>
+      <span class="mote"></span>
+      <span class="mote"></span>
+    </div>
   </div>
 
   <script>
@@ -17,9 +28,12 @@
       var params = new URLSearchParams(window.location.search);
       var token = params.get('id');
       var queueEl = document.getElementById('queueNumber');
+      var messageEl = document.getElementById('queueMessage');
       
       if (!token) {
         queueEl.textContent = 'not here.';
+        queueEl.classList.add('visible');
+        messageEl.classList.add('hidden');
         return;
       }
       
@@ -27,13 +41,19 @@
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data.position) {
-            queueEl.textContent = '# ' + data.position;
+            queueEl.textContent = '#' + data.position;
+            queueEl.classList.add('visible');
+            messageEl.classList.add('visible');
           } else {
-            queueEl.textContent = 'not found.';
+            queueEl.textContent = 'not here.';
+            queueEl.classList.add('visible');
+            messageEl.classList.add('hidden');
           }
         })
         .catch(function() {
-          queueEl.textContent = 'error.';
+          queueEl.textContent = 'closed.';
+          queueEl.classList.add('visible');
+          messageEl.classList.add('hidden');
         });
     })();
   </script>
