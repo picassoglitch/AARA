@@ -2,17 +2,13 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "public",
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@3"
-    }
-  },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index.ts" },
-    { "source": "/i/:code", "destination": "/api/index.ts" },
-    { "source": "/verify/:id", "destination": "/api/index.ts" },
-    { "source": "/t/:id", "destination": "/api/index.ts" },
-    { "source": "/c/:code", "destination": "/api/index.ts" }
+    { "source": "/api/:path*", "destination": "/api" },
+    { "source": "/i/:code", "destination": "/api" },
+    { "source": "/verify/:id", "destination": "/api" },
+    { "source": "/t/:id", "destination": "/api" },
+    { "source": "/c/:code", "destination": "/api" },
+    { "source": "/:path*", "destination": "/api" }
   ],
   "headers": [
     {

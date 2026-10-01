@@ -171,7 +171,7 @@ export function createAdminRoutes(): Hono {
     requireAuth,
     csrfProtection(),
     async (c) => {
-      const id = parseInt(c.req.param('id'), 10);
+      const id = parseInt(c.req.param('id') || '0', 10);
       const body = await c.req.json();
 
       const db = await getDatabase();
@@ -190,7 +190,7 @@ export function createAdminRoutes(): Hono {
     requireAuth,
     csrfProtection(),
     async (c) => {
-      const id = parseInt(c.req.param('id'), 10);
+      const id = parseInt(c.req.param('id') || '0', 10);
 
       const db = await getDatabase();
       await db.setCurrentArtwork(id);
@@ -210,7 +210,7 @@ export function createAdminRoutes(): Hono {
     requireAuth,
     csrfProtection(),
     async (c) => {
-      const id = parseInt(c.req.param('id'), 10);
+      const id = parseInt(c.req.param('id') || '0', 10);
       const body = await c.req.json();
 
       const db = await getDatabase();
@@ -261,7 +261,7 @@ export function createAdminRoutes(): Hono {
     requireAuth,
     csrfProtection(),
     async (c) => {
-      const id = parseInt(c.req.param('id'), 10);
+      const id = parseInt(c.req.param('id') || '0', 10);
       const body = await c.req.json();
 
       const db = await getDatabase();

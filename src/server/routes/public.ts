@@ -136,7 +136,7 @@ publicRoutes.post(
   '/api/campaign/:code/click',
   rateLimit({ windowMs: 60 * 1000, max: 30, keyPrefix: 'campaign-click' }),
   async (c) => {
-    const code = c.req.param('code');
+    const code = c.req.param('code') || '';
     
     const db = await getDatabase();
     const campaign = await db.getCampaignByCode(code);
