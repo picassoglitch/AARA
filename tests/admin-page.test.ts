@@ -32,7 +32,7 @@ describe('admin page routes', () => {
     
     const html = await res.text();
     expect(html).toContain(`'${TEST_ADMIN_PATH}'`);
-    expect(html).toContain('ara admin');
+    expect(html).toContain('<title>ara</title>');
   });
 
   it('GET /<ADMIN_PATH> sets Cache-Control no-store header', async () => {
