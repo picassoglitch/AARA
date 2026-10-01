@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ara</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="page">
+    <div class="artwork-container" id="artworkContainer">
+      <p class="loading" id="loading">.</p>
+      <img class="artwork-image hidden" id="artworkImage" alt="">
+    </div>
+    
+    <div class="artwork-info" id="artworkInfo">
+      <p class="artwork-line" id="artworkLine"></p>
+    </div>
+    
+    <form class="waitlist-form" id="waitlistForm">
+      <div class="waitlist-input-group">
+        <label class="waitlist-label" for="contact">request</label>
+        <input 
+          type="email" 
+          class="waitlist-input" 
+          id="contact" 
+          name="contact" 
+          autocomplete="email"
+          required
+        >
+        <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="ref" id="refInput">
+        <button type="submit" class="waitlist-submit">submit</button>
+        <p class="waitlist-error hidden" id="errorMessage"></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      
+      if (ref) {
+        document.getElementById('refInput').value = ref;
+        
+        fetch('/api/campaign/' + encodeURIComponent(ref) + '/click', {
+          method: 'POST',
+          credentials: 'same-origin'
+        }).catch(function() {});
+      }
+
+      fetch('/api/artwork/current')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var loading = document.getElementById('loading');
+          var img = document.getElementById('artworkImage');
+          var line = document.getElementById('artworkLine');
+          
+          if (data.artwork) {
+            img.src = data.artwork.imageUrl;
+            img.onload = function() {
+              loading.classList.add('hidden');
+              img.classList.remove('hidden');
+            };
+            line.textContent = data.artwork.date + ' \u2014 ' + data.artwork.title;
+          } else {
+            loading.textContent = 'nothing here today.';
+          }
+        })
+        .catch(function() {
+          document.getElementById('loading').textContent = 'closed.';
+        });
+
+      var form = document.getElementById('waitlistForm');
+      var errorEl = document.getElementById('errorMessage');
+      
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        errorEl.classList.add('hidden');
+        
+        var formData = new FormData(form);
+        
+        fetch('/api/waitlist', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        })
+          .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+          .then(function(result) {
+            if (result.ok) {
+              window.location.href = '/queued.html?id=' + encodeURIComponent(result.data.token) + '&pos=' + result.data.position + '&wl=0';
+            } else {
+              errorEl.textContent = result.data.error || 'error.';
+              errorEl.classList.remove('hidden');
+            }
+          })
+          .catch(function() {
+            errorEl.textContent = 'error.';
+            errorEl.classList.remove('hidden');
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

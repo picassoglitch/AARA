@@ -1,0 +1,172 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background: #000;
+  color: #888;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.artwork-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.artwork-image {
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
+  object-fit: contain;
+}
+
+.artwork-info {
+  padding: 0 40px 30px;
+  text-align: center;
+}
+
+.artwork-line {
+  color: #666;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.waitlist-form {
+  padding: 0 40px 60px;
+  text-align: center;
+}
+
+.waitlist-input-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.waitlist-label {
+  color: #555;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.waitlist-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  color: #888;
+  font-size: 14px;
+  padding: 8px 0;
+  width: 240px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.waitlist-input:focus {
+  border-color: #555;
+}
+
+.waitlist-input::placeholder {
+  color: #444;
+}
+
+.waitlist-submit {
+  display: none;
+}
+
+.waitlist-error {
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+}
+
+.queue-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.queue-number {
+  color: #888;
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+}
+
+.queue-message {
+  color: #555;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.stub-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.stub-message {
+  color: #555;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.stub-word {
+  color: #666;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+
+.loading {
+  color: #444;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .artwork-container {
+    padding: 20px;
+  }
+  
+  .artwork-info {
+    padding: 0 20px 20px;
+  }
+  
+  .waitlist-form {
+    padding: 0 20px 40px;
+  }
+  
+  .waitlist-input {
+    width: 200px;
+  }
+}

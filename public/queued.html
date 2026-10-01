@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ara</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="queue-page">
+    <p class="queue-number" id="queueNumber"></p>
+    <p class="queue-message">you will be contacted.</p>
+  </div>
+
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var token = params.get('id');
+      var queueEl = document.getElementById('queueNumber');
+      
+      if (!token) {
+        queueEl.textContent = 'not here.';
+        return;
+      }
+      
+      fetch('/api/waitlist/position?token=' + encodeURIComponent(token))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.position) {
+            queueEl.textContent = '# ' + data.position;
+          } else {
+            queueEl.textContent = 'not found.';
+          }
+        })
+        .catch(function() {
+          queueEl.textContent = 'error.';
+        });
+    })();
+  </script>
+</body>
+</html>
