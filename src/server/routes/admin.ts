@@ -4,8 +4,9 @@ import { getDatabase } from '../../db/index.js';
 import { getStorage } from '../../storage/index.js';
 import { verifyPassword, generateToken, getClientIp, hashIp, generateShortCode } from '../utils.js';
 import { rateLimit } from '../middleware/rateLimit.js';
-import { csrfProtection, getCsrfToken } from '../middleware/csrf.js';
+import { csrfProtection, getCsrfToken, ensureCsrfCookie } from '../middleware/csrf.js';
 import { noIndex } from '../middleware/security.js';
+import { getAdminHtml } from '../views/admin-html.js';
 
 const SESSION_COOKIE = 'ara_session';
 const SESSION_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -38,7 +39,14 @@ export function createAdminRoutes(): Hono {
     await next();
   };
 
-  admin.get(`/${adminPath}`, async (c) => {
+  admin.get(`/${adminPath}`, ensureCsrfCookie(), async (c) => {
+    const html = getAdminHtml(adminPath);
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    c.header('Pragma', 'no-cache');
+    return c.html(html);
+  });
+
+  admin.get(`/${adminPath}/session`, ensureCsrfCookie(), async (c) => {
     const sessionId = getCookie(c, SESSION_COOKIE);
     if (sessionId) {
       const db = await getDatabase();

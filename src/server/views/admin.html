@@ -185,7 +185,7 @@
       }
       
       function checkAuth() {
-        api('GET', '').then(function(r) {
+        api('GET', '/session').then(function(r) {
           if (r.data.authenticated) {
             csrfToken = r.data.csrfToken;
             showAdmin();

@@ -5,19 +5,35 @@ import { generateToken } from '../utils.js';
 const CSRF_COOKIE = 'ara_csrf';
 const CSRF_HEADER = 'x-csrf-token';
 
+function setTokenCookie(c: Context, token: string): void {
+  setCookie(c, CSRF_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Strict',
+    path: '/',
+    maxAge: 60 * 60 * 24,
+  });
+}
+
+export function ensureCsrfCookie() {
+  return async (c: Context, next: Next) => {
+    let token = getCookie(c, CSRF_COOKIE);
+    if (!token) {
+      token = generateToken(32);
+      setTokenCookie(c, token);
+    }
+    c.set('csrfToken', token);
+    await next();
+  };
+}
+
 export function csrfProtection() {
   return async (c: Context, next: Next) => {
     let token = getCookie(c, CSRF_COOKIE);
     
     if (!token) {
       token = generateToken(32);
-      setCookie(c, CSRF_COOKIE, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
-        path: '/',
-        maxAge: 60 * 60 * 24,
-      });
+      setTokenCookie(c, token);
     }
     
     c.set('csrfToken', token);

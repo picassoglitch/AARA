@@ -1,6 +1,5 @@
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { promises as fs } from 'fs';
 import { createApp, getAdminPath } from './server/app.js';
 import { getDatabase } from './db/index.js';
 import { hashPassword } from './server/utils.js';
@@ -23,16 +22,6 @@ async function main() {
 
   const adminPath = getAdminPath();
   const app = createApp();
-
-  const adminHtml = await fs.readFile('./public/admin.html', 'utf-8');
-  const adminHtmlWithPath = adminHtml.replace(
-    "window.ADMIN_PATH || location.pathname",
-    `'${adminPath}'`
-  );
-  
-  app.get(`/${adminPath}`, async (c) => {
-    return c.html(adminHtmlWithPath);
-  });
 
   app.use('/uploads/*', serveStatic({ root: './' }));
 

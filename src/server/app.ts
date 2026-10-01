@@ -75,7 +75,8 @@ export function createApp() {
   });
 
   app.notFound((c) => {
-    if (c.req.path === '/admin' || c.req.path.startsWith('/admin/')) {
+    const path = c.req.path;
+    if (path === '/admin' || path.startsWith('/admin/') || path === '/admin.html') {
       return c.html(`<!DOCTYPE html>
 <html lang="en">
 <head>
