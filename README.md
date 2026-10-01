@@ -93,12 +93,42 @@ ADMIN_PASSWORD_HASH=<output from seed script>
 
 | variable | required | description |
 |----------|----------|-------------|
-| `DATABASE_URL` | yes | postgres connection string (neon, vercel postgres) |
-| `BLOB_READ_WRITE_TOKEN` | yes | vercel blob token |
+| `DATABASE_URL` | yes* | postgres connection string (neon, vercel postgres) |
+| `BLOB_READ_WRITE_TOKEN` | yes* | vercel blob token (legacy auth) |
 | `ADMIN_PATH` | yes | secret admin path (e.g. `_ara_console_x7k9m2`) |
 | `ADMIN_PASSWORD_HASH` | yes | hashed admin password (use `npm run seed` to generate) |
 | `IP_SALT` | recommended | salt for ip hashing in rate limiting |
 | `NODE_ENV` | auto | set to `production` by vercel |
+
+#### database url resolution
+
+the code resolves the database url from the first non-empty value of these env vars (in order):
+
+1. `DATABASE_URL`
+2. `POSTGRES_URL`
+3. `aara_DATABASE_URL`
+4. `aara_POSTGRES_URL`
+5. any env var ending with `_DATABASE_URL` (excluding `_UNPOOLED`)
+6. any env var ending with `_POSTGRES_URL` (excluding `_UNPOOLED`)
+
+this handles vercel integrations (e.g., neon) that create prefixed env vars like `aara_DATABASE_URL`. pooled urls are preferred over unpooled.
+
+if running on vercel (`VERCEL` env var is set) and no postgres url resolves, the app throws an error instead of falling back to sqlite.
+
+#### blob storage resolution
+
+the code selects vercel blob storage when any of these env vars are set:
+
+1. `BLOB_READ_WRITE_TOKEN` (legacy token auth)
+2. `aara_BLOB_READ_WRITE_TOKEN`
+3. any env var ending with `_BLOB_READ_WRITE_TOKEN`
+4. `BLOB_STORE_ID` (oidc auth, used with `VERCEL_OIDC_TOKEN`)
+5. `aara_BLOB_STORE_ID`
+6. any env var ending with `_BLOB_STORE_ID`
+
+when only `BLOB_STORE_ID` is set (no token), the `@vercel/blob` sdk uses oidc to authenticate automatically at runtime.
+
+if running on vercel and no blob config resolves, the app throws an error instead of writing to local disk (which would fail on vercel's read-only filesystem).
 
 ## queue ordering rule
 
