@@ -2,13 +2,17 @@
  * Resolves the database URL from various environment variable names.
  * Vercel integrations (e.g., Neon) may create vars with custom prefixes.
  * Prefers pooled URLs over unpooled for connection efficiency.
+ *
+ * The aara_ prefixed vars come first: a generic DATABASE_URL in the
+ * environment (e.g. another project's .env) must never win over aara's own
+ * database, or aara writes its tables into someone else's db.
  */
 
 const KNOWN_ENV_NAMES = [
-  'DATABASE_URL',
-  'POSTGRES_URL',
   'aara_DATABASE_URL',
   'aara_POSTGRES_URL',
+  'DATABASE_URL',
+  'POSTGRES_URL',
 ];
 
 export interface ResolveResult {
