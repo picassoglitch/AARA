@@ -30,6 +30,22 @@ describe('resolveDatabaseUrl', () => {
     expect(result.source).toBe('DATABASE_URL');
   });
 
+  it('prefers aara_DATABASE_URL over a generic DATABASE_URL', () => {
+    process.env.DATABASE_URL = 'postgres://other-project';
+    process.env.aara_DATABASE_URL = 'postgres://aara';
+    const result = resolveDatabaseUrl();
+    expect(result.url).toBe('postgres://aara');
+    expect(result.source).toBe('aara_DATABASE_URL');
+  });
+
+  it('prefers aara_POSTGRES_URL over a generic DATABASE_URL', () => {
+    process.env.DATABASE_URL = 'postgres://other-project';
+    process.env.aara_POSTGRES_URL = 'postgres://aara-pg';
+    const result = resolveDatabaseUrl();
+    expect(result.url).toBe('postgres://aara-pg');
+    expect(result.source).toBe('aara_POSTGRES_URL');
+  });
+
   it('resolves POSTGRES_URL when DATABASE_URL is not set', () => {
     process.env.POSTGRES_URL = 'postgres://b';
     const result = resolveDatabaseUrl();
